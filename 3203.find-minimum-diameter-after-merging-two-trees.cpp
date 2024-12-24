@@ -1,3 +1,64 @@
+class Solution {
+public:
+    int countTreeMaxCumulativeHit(vector<vector<int>>& edges){
+        map<int, set<int>> mapping;
+        for(vector<int> e: edges){
+            if(mapping.count(e[0])){
+                mapping[e[0]].insert(e[1]);
+            } else {
+                mapping[e[0]] = set<int>({e[1]});
+            }
+            if(mapping.count(e[1])){
+                mapping[e[1]].insert(e[0]);
+            } else {
+                mapping[e[1]] = set<int>({e[0]});
+            }
+        }
+
+        vector<int> cumucount(mapping.size());
+        int wholeMax = 0;
+        while(mapping.size() != 0){
+            set<int> wantedDel;
+            for(auto pair: mapping){
+                if(pair.second.size() == 1){
+                    for(int targetVal: pair.second){
+                        if(wantedDel.contains(targetVal)){
+                            continue;
+                        }
+                        cumucount[targetVal] = max(cumucount[targetVal], cumucount[pair.first]+1);
+                        wantedDel.insert(pair.first);
+                    }
+                }
+            }
+            // need to add judge odd or even system
+            for(int del: wantedDel){
+                for(int targetNode: mapping[del]){
+                    mapping[targetNode].erase(del);
+                    if(mapping[targetNode].size() == 0){
+                        mapping.erase(targetNode);
+                    }
+                }
+                mapping.erase(del);
+            }
+        }
+        return *max_element(cumucount.begin(), cumucount.end());
+    }
+    int minimumDiameterAfterMerge(vector<vector<int>>& edges1, vector<vector<int>>& edges2) {
+        int e1 = countTreeMaxCumulativeHit(edges1);
+        int e2 = countTreeMaxCumulativeHit(edges2);
+        int t1=e1*2;
+        int t2=e2*2;
+        if(edges1.size()%2==1){
+            t1=(e1-1)*2;
+        }
+        if(edges2.size()%2==1){
+            t2=(e2-1)*2;
+        }
+        cout << e1 << e2 << t2 << t2;
+        return max(max(e1+e2+1, t1), t2);
+    }
+};
+
 const int N=100000;
 int deg[N]={0};
 vector<int> adj[N];
