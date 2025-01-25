@@ -1,0 +1,35 @@
+class Solution {
+public:
+    vector<int> lexicographicallySmallestArray(vector<int>& nums, int limit) {
+        int nLen=nums.size();
+        map<int, priority_queue<int, vector<int>, greater<int>>> mapping;
+        map<int, int> idxmapping;
+        vector<int> numstmp=nums;
+        sort(numstmp.begin(), numstmp.end());
+        int groupNum=0;
+        int base=-1;
+        priority_queue<int, vector<int>, greater<int>> mappingElement;
+        for(int i=0; i<nLen; ++i){
+            base=numstmp[i];
+            mappingElement.push(numstmp[i]);
+            idxmapping.insert({numstmp[i], groupNum});
+            while(i+1<nLen && numstmp[i+1]<=base+limit){
+                mappingElement.push(numstmp[i+1]);
+                idxmapping.insert({numstmp[i+1], groupNum});
+                base=numstmp[i+1];
+                ++i;
+            }
+            mapping.insert({groupNum, mappingElement});
+            mappingElement={};
+            groupNum++;
+        }
+        vector<int> ans;
+        for(int el: nums){
+            int idx=idxmapping[el];
+            int val=mapping[idx].top();
+            mapping[idx].pop();
+            ans.push_back(val);
+        }
+        return ans;
+    }
+};
