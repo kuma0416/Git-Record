@@ -1,0 +1,47 @@
+// TC, SC: O(N)
+class Solution {
+public:
+    set<int> cycle;
+    set<int> noncycle;
+    vector<int> findRedundantConnection(vector<vector<int>>& edges) {
+        int eLen=edges.size();
+        map<int, set<int>> mapping;
+        vector<int> indegree(eLen+1, 0);
+        vector<int> ans=edges[eLen-1];
+        for(int i=1; i<=eLen; ++i){
+            mapping[i]={};
+        }
+        for(int i=0; i<eLen; ++i){
+            mapping[edges[i][0]].insert(edges[i][1]);
+            mapping[edges[i][1]].insert(edges[i][0]);
+            indegree[edges[i][0]]++;
+            indegree[edges[i][1]]++;
+        }
+        deque<int> p;
+        for(int i=1; i<=eLen; ++i){
+            if(indegree[i]==1){
+                p.push_back(i);
+            }
+        }
+        while(!p.empty()){
+            int rootnum=p.front();
+            for(int targetnum: mapping[rootnum]){
+                indegree[rootnum]--;
+                mapping[targetnum].erase(rootnum);
+                indegree[targetnum]--;
+                if(indegree[targetnum]==1){
+                    p.push_back(targetnum);
+                }
+            }
+            p.pop_front();
+        }
+        for(int i=eLen-1; i>=0; --i){
+            if(indegree[edges[i][0]]==2 && indegree[edges[i][1]]==2){
+                ans[0]=edges[i][0];
+                ans[1]=edges[i][1];
+                break;
+            }
+        }
+        return ans;
+    }
+};
