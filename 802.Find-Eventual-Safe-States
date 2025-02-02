@@ -1,0 +1,44 @@
+// TC: O(V+E), SC: O(V), V: node num, E: edge num
+class Solution {
+public:
+    bool* terminal;
+    bool* visited;
+    vector<int> eventualSafeNodes(vector<vector<int>>& graph) {
+        int nLen=graph.size();
+        vector<bool> terminal(nLen, false);
+        vector<bool> visited(nLen, false);
+        vector<int> ans;
+        for(int i=0; i<nLen; ++i){
+            set<int> tmps;
+            bool ians=dfs(graph, i, tmps, terminal, visited);
+            if(ians){
+                ans.push_back(i);
+            }
+        }
+        return ans;
+    }
+    bool dfs(vector<vector<int>>& graph, int curidx, set<int> storage, vector<bool>& terminal, vector<bool>& visited){
+        int innerLen = graph[curidx].size();
+        if((visited[curidx] && terminal[curidx]) || innerLen == 0){
+            return true;
+        } else if(visited[curidx] && !terminal[curidx]){
+            return false;
+        }
+        if(storage.contains(curidx)){
+            visited[curidx]=true;
+            terminal[curidx]=true;
+            return false;
+        }
+        bool ans=true;
+        storage.insert(curidx);
+        for(int i=0; i<innerLen; ++i){
+            ans=ans&dfs(graph, graph[curidx][i], storage, terminal, visited);
+            if(ans==false){
+                break;
+            }
+        }
+        visited[curidx]=true;
+        terminal[curidx]=ans;
+        return ans;
+    }
+};

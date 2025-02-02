@@ -1,0 +1,43 @@
+// TC: O(V+E), SC: O(V)
+class Solution {
+public:
+    vector<bool> checkIfPrerequisite(int numCourses, vector<vector<int>>& prerequisites, vector<vector<int>>& queries) {
+        int qLen=queries.size(), preLen=prerequisites.size();
+        vector<int> indegree(numCourses, 0);
+        map<int, set<int>> allmapping;
+        map<int, set<int>> ansmapping;
+        deque<int> ps;
+        vector<bool> ans;
+        for(int i=0; i<numCourses; ++i){
+            ansmapping[i]={};
+            allmapping[i]={};
+        }
+        for(int i=0; i<preLen; ++i){
+            allmapping[prerequisites[i][0]].insert(prerequisites[i][1]);
+            allmapping[prerequisites[i][1]].insert(prerequisites[i][0]);
+            indegree[prerequisites[i][0]]++;
+        }
+        for(int i=0; i<numCourses; ++i){
+            if(indegree[i]==0){
+                ps.push_back(i);
+            }
+        }
+        while(!ps.empty()){
+            int curpsel=ps.front();
+            for(int rootnum: allmapping[curpsel]){
+                ansmapping[rootnum].insert(ansmapping[curpsel].begin(), ansmapping[curpsel].end());
+                ansmapping[rootnum].insert(curpsel);
+                allmapping[rootnum].erase(curpsel);
+                indegree[rootnum]--;
+                if(indegree[rootnum]==0){
+                    ps.push_back(rootnum);
+                }
+            }
+            ps.pop_front();
+        }
+        for(int i=0; i<qLen; ++i){
+            ans.push_back(ansmapping[queries[i][0]].contains(queries[i][1]));
+        }
+        return ans;
+    }
+};

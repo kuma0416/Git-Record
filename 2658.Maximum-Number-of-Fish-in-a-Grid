@@ -1,0 +1,43 @@
+// TC, SC: O(N*M)
+class Solution {
+public:
+    int rows=0;
+    int cols=0;
+    vector<int> directx={-1, 1, 0, 0};
+    vector<int> directy={0, 0, -1, 1};
+    int findMaxFish(vector<vector<int>>& grid) {
+        rows=grid.size(); 
+        cols=grid[0].size();
+        vector<vector<bool>> visited(rows, vector<bool>(cols, false));
+        int maxfish=0;
+        for(int i=0; i<rows; ++i){
+            for(int j=0; j<cols; ++j){
+                if(visited[i][j]==true){
+                    continue;
+                }
+                if(grid[i][j]==0){
+                    visited[i][j]=true;
+                } else {
+                    maxfish=max(maxfish, dfs(grid, visited, i, j));
+                }
+            }
+        }
+        return maxfish;
+    }
+    int dfs(vector<vector<int>>& grid, vector<vector<bool>>& visited, int curx, int cury){
+        if(curx<0 || curx>=rows || cury<0 || cury>=cols){
+            return 0;
+        }
+        int ans=0;
+        if(grid[curx][cury]==0 || visited[curx][cury]){
+            return 0;
+        } else {
+            visited[curx][cury]=true;
+            for(int i=0; i<4; ++i){
+                ans+=dfs(grid, visited, curx+directx[i], cury+directy[i]);
+            }
+            ans+=grid[curx][cury];
+        }
+        return ans;
+    }
+};
