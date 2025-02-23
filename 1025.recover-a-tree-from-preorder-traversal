@@ -1,0 +1,48 @@
+// TC, SC: O(N)
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+typedef pair<TreeNode*, int> ndg;
+class Solution {
+public:
+    TreeNode* recoverFromPreorder(string traversal) {
+        traversal+='-';
+        int prevdeg=0, currdeg=0;
+        int lastNum=0;
+        int lastDcount=0;
+        TreeNode* tn=new TreeNode(0);
+        deque<ndg> stored={{tn, -1}};
+        for(char c: traversal){
+            if(c=='-'){
+                // deque檢查
+                if(lastNum!=0){
+                    tn=new TreeNode(lastNum);
+                    while(stored.back().second != currdeg-1){
+                        stored.pop_back();
+                    }
+                    if(stored.back().first->left != nullptr){
+                        stored.back().first->right = tn;
+                    } else {
+                        stored.back().first->left = tn;
+                    }
+                    stored.push_back({tn, currdeg});
+                    currdeg=0;
+                    lastNum=0;
+                }
+                currdeg++;
+            } else {
+                lastNum=lastNum*10+(c-'0');
+                continue;
+            }
+        }
+        return stored.front().first->left;
+    }
+};
