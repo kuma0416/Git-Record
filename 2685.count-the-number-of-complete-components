@@ -1,0 +1,90 @@
+// TC: O(N), SC: O(N)
+class Solution {
+public:
+    int countCompleteComponents(int n, vector<vector<int>>& edges) {
+        vector<int> root(n, -1);
+        iota(root.begin(), root.end(), 0);
+        unordered_map<int, unordered_set<int>> group;
+        vector<int> el(n, 0);
+        for(vector<int> e: edges){
+            int l=e[0]<e[1]? e[0]: e[1];
+            int r=e[0]>e[1]? e[0]: e[1];
+            if(el[l]<el[r]){
+                root[l]=findroot(root, r);
+            } else if(el[l]>el[r]){
+                root[l] = findroot(root, l);
+            } else {
+                int tmpr=min(root[l], root[r]);
+                root[l] = tmpr;
+            }
+            root[r] = root[l];
+            el[l]++;
+            el[r]++;
+        }
+        for(int i=0; i<n; ++i){
+            int r=findroot(root, i);
+            group[r].insert(i);
+        }
+        int ans=0;
+        bool pass;
+        for(auto a: group){
+            pass=true;
+            for(int b: a.second){
+                if(el[b]!=a.second.size()-1){
+                    pass=false;
+                    break;
+                }
+            }
+            if(pass==true){
+                ++ans;
+            }
+        }
+        return ans;
+    }
+    int findroot(vector<int>& root, int n){
+        return n==root[n]? n: findroot(root, root[n]);
+    }
+};
+// gpt improvement
+class Solution {
+public:
+    int countCompleteComponents(int n, vector<vector<int>>& edges) {
+        vector<int> root(n), rank(n, 1), degree(n, 0);
+        iota(root.begin(), root.end(), 0);
+        
+        function<int(int)> find = [&](int x) {
+            return root[x] == x ? x : root[x] = find(root[x]);
+        };
+        
+        for (auto& e : edges) {
+            int u = e[0], v = e[1];
+            degree[u]++;
+            degree[v]++;
+            int ru = find(u), rv = find(v);
+            if (ru != rv) {
+                if (rank[ru] < rank[rv]) swap(ru, rv);
+                root[rv] = ru;
+                if (rank[ru] == rank[rv]) rank[ru]++;
+            }
+        }
+        
+        unordered_map<int, vector<int>> group;
+        for (int i = 0; i < n; ++i) {
+            group[find(i)].push_back(i);
+        }
+        
+        int ans = 0;
+        for (auto& [_, members] : group) {
+            int sz = members.size();
+            bool complete = true;
+            for (int node : members) {
+                if (degree[node] != sz - 1) {
+                    complete = false;
+                    break;
+                }
+            }
+            if (complete) ans++;
+        }
+        return ans;
+    }
+};
